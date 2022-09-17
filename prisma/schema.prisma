@@ -1,0 +1,140 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.text annotations in model Account below
+  // Further reading: 
+  // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
+  // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+  url      = env("DATABASE_URL")
+}
+
+// Necessary for Next auth
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? //@db.Text
+  access_token      String? //@db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? //@db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// end
+
+// SCOOTER RELATED STUFF
+model Scooter {
+  id          String @id @default(cuid())
+  name        String
+  description String
+  price       Int
+  image       String
+
+  // Relations
+  provider   Provider @relation(fields: [providerId], references: [id])
+  providerId String
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  scooterLocations ScooterLocation[]
+}
+
+model Zone {
+  id        String   @id @default(cuid())
+  name      String
+  type      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parentId String
+  parent   Zone?  @relation("ParentToChildren", fields: [parentId], references: [id])
+  subZones Zone[] @relation("ParentToChildren")
+
+  provider   Provider @relation(fields: [providerId], references: [id])
+  providerId String
+}
+
+model Provider {
+  id      String    @id @default(cuid())
+  name    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  zones   Zone[]
+  Scooter Scooter[]
+
+  @@map("ScooterProvider")
+}
+
+model ScooterLocation {
+  id        String   @id @default(cuid())
+  latitude  Float
+  longitude Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  scooter   Scooter @relation(fields: [scooterId], references: [id])
+  scooterId String
+}
+
+
+// LOCALIZATION RELATED STUFF
+model Language {
+  id      String @id @default(cuid())
+  name    String
+  code    String
+  isRTL   Boolean
+  isLocal Boolean
+  isDefault Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Translation {
+  id      String @id @default(cuid())
+  key     String
+  value   String
+  language Language @relation(fields: [languageId], references: [id])
+  languageId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
