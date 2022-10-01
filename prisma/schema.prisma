@@ -73,8 +73,8 @@ model Scooter {
   provider   Provider @relation(fields: [providerId], references: [id])
   providerId String
 
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
   scooterLocations ScooterLocation[]
 }
 
@@ -94,8 +94,8 @@ model Zone {
 }
 
 model Provider {
-  id      String    @id @default(cuid())
-  name    String
+  id        String   @id @default(cuid())
+  name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -116,25 +116,25 @@ model ScooterLocation {
   scooterId String
 }
 
-
 // LOCALIZATION RELATED STUFF
 model Language {
-  id      String @id @default(cuid())
-  name    String
-  code    String
-  isRTL   Boolean
-  isLocal Boolean
-  isDefault Boolean
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String        @id @default(cuid())
+  name        String
+  code        String
+  isRTL       Boolean
+  isLocal     Boolean
+  isDefault   Boolean
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  Translation Translation[]
 }
 
 model Translation {
-  id      String @id @default(cuid())
-  key     String
-  value   String
-  language Language @relation(fields: [languageId], references: [id])
+  id         String   @id @default(cuid())
+  key        String
+  value      String
+  language   Language @relation(fields: [languageId], references: [id])
   languageId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
